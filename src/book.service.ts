@@ -6,14 +6,11 @@ import { readFile } from 'fs/promises';
 export class BookService implements OnModuleInit {
   private readonly bookStorage = new Map<string, Book>();
 
-  onModuleInit() {
-    return readFile(`${__dirname}/dataset.json`)
-      .then((dataset) => {
-        return JSON.parse(dataset.toString()) as Book[];
-      })
-      .then((books) => {
-        books.forEach((book) => this.addBook(book));
-      });
+  async onModuleInit() {
+    let dataset = await readFile(`${__dirname}/dataset.json`);
+
+    const books = JSON.parse(dataset.toString()) as Book[];
+    books.forEach(book => this.addBook(book));
   }
 
   addBook(book: Book): void {
