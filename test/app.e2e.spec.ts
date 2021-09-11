@@ -13,6 +13,7 @@ describe('Books API', () => {
       imports: [BookModule],
     }).compile();
 
+
     app = moduleRef.createNestApplication();
     await app.init();
 
@@ -23,6 +24,7 @@ describe('Books API', () => {
     const response = await httpRequester.get('/books').expect(200);
 
     expect(response.body).toEqual(expect.any(Array));
+    expect(response.body.length).toBeGreaterThan(10);
   });
 
   it(`/POST books`, async () => {
@@ -112,6 +114,10 @@ describe('Books API', () => {
     // Finally check the book was successfully deleted
     const response = await httpRequester.get('/books');
 
-    expect(response.body).toEqual([]);
+    expect(response.body).not.toContainEqual({
+      title: 'Candide',
+      author: 'Voltaire',
+      date: '1759',
+    });
   });
 });
