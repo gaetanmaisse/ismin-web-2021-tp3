@@ -1,23 +1,24 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Book } from './Book';
 import { BookDto } from './BookDto';
-import { readFile } from 'fs';
+import { readFile } from 'fs/promises';
 
 @Injectable()
 export class BookService implements OnModuleInit {
-
   onModuleInit() {
-    readFile('src/dataset.json',(err,data)=>{
-      if(err) throw err;
-      this.bookStorage = JSON.parse(data.toString());
-      console.log(this.bookStorage)
-    })
+    readFile('src/dataset.json').then((data) => {
+      console.log('OnModuleInit 0');
+      const dataString: string = data.toString();
+      const jsonData: Book[] = JSON.parse(dataString);
+      jsonData.forEach((book) => {
+        this.addBook(book);
+      });
+      console.log('OnModuleInit 1');
+    });
+    console.log('OnModuleInit2');
   }
 
-
-
-
-  private bookStorage = new Map<string, Book>();
+  private bookStorage: Map<string, Book> = new Map<string, Book>();
 
   addBook(book: Book): void {
     this.bookStorage.set(book.title, book);
