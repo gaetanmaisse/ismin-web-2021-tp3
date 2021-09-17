@@ -6,15 +6,22 @@ import { readFile } from 'fs/promises';
 @Injectable()
 export class BookService implements OnModuleInit {
   onModuleInit() {
-    readFile('src/dataset.json').then((data) => {
-      console.log('OnModuleInit 0');
-      const dataString: string = data.toString();
-      const jsonData: Book[] = JSON.parse(dataString);
-      jsonData.forEach((book) => {
-        this.addBook(book);
+    readFile('src/dataset.json')
+      .then((data) => {
+        console.log('OnModuleInit 0');
+        const dataString: string = data.toString();
+        return dataString;
+      })
+      .then((dataString) => {
+        const jsonData: Book[] = JSON.parse(dataString);
+        return jsonData;
+      })
+      .then((jsonData) => {
+        jsonData.forEach((book) => {
+          this.addBook(book);
+        });
+        console.log('OnModuleInit 1');
       });
-      console.log('OnModuleInit 1');
-    });
     console.log('OnModuleInit2');
   }
 
