@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { Book } from './Book';
+import { Book, APIBook } from './Book';
 import { BookDto } from './BookDto';
 import { readFile } from 'fs/promises';
 
@@ -9,8 +9,14 @@ export class BookService implements OnModuleInit {
     const file = await readFile('src/dataset.json');
     const stringData = file.toString();
     console.log('OnModuleInit 0');
-    const jsonData: Book[] = JSON.parse(stringData);
-    jsonData.forEach((book) => {
+    const jsonData: APIBook[] = JSON.parse(stringData);
+
+    jsonData.forEach((apiBook) => {
+      const book: Book = {
+        title: apiBook.title,
+        author: apiBook.authors,
+        date: apiBook.publication_date,
+      };
       this.addBook(book);
     });
   }
