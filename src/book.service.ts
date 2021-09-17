@@ -1,24 +1,25 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Book, APIBook } from './Book';
-import { BookDto } from './BookDto';
-import { readFile } from 'fs/promises';
+import { map } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class BookService implements OnModuleInit {
+  constructor(private readonly http: HttpService) {}
   async onModuleInit() {
-    const file = await readFile('src/dataset.json');
-    const stringData = file.toString();
-    console.log('OnModuleInit 0');
-    const jsonData: APIBook[] = JSON.parse(stringData);
-
-    jsonData.forEach((apiBook) => {
-      const book: Book = {
-        title: apiBook.title,
-        author: apiBook.authors,
-        date: apiBook.publication_date,
-      };
-      this.addBook(book);
-    });
+    this.http
+      .get<APIBook[]>('https://api.npoint.io/40518b0773c787f94072')
+      .pipe(map((response) => response.data))
+      .subscribe((apiBooks) => {
+        apiBooks.forEach((apiBook) => {
+          const book: Book = {
+            title: apiBook.title,
+            author: apiBook.authors,
+            date: apiBook.publication_date,
+          };
+          this.addBook(book);
+        });
+      });
   }
 
   private bookStorage: Map<string, Book> = new Map<string, Book>();
