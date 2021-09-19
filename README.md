@@ -58,3 +58,19 @@ git pull
 # Switch to `solution` branch
 git checkout solution
 ```
+
+
+## 👨 TP Done in randori
+
+The implementation of the TP done in randori mode during the class is available in the `tp-done-in-randori`  branch.
+
+```
+# Commit or revert your local changes
+# git add . && git commit -m "YOUR_MSG" 
+
+# Update your repository
+git pull
+
+# Switch to `tp-done-in-randori` branch
+git checkout tp-done-in-randori
+```
