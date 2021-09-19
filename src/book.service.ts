@@ -13,36 +13,35 @@ export class BookService implements OnModuleInit {
   constructor(private readonly httpService: HttpService) {}
 
   async onModuleInit(): Promise<void> {
-    const dataset = await readFile(`${__dirname}/dataset.json`);
+    const dataset = await readFile(`src/dataset.json`, 'utf8');
 
-    const books = JSON.parse(dataset.toString()) as any[];
-    books
-      .map((bookFromFile) => {
-        const convertedBook: Book = {
-          title: bookFromFile.title,
-          author: bookFromFile.author,
-          date: new Date(bookFromFile.date),
-        };
-        return convertedBook;
-      })
-      .forEach((book) => this.addBook(book));
+    // Read file and then convert content to a Book[]
+    const fileBooks = (JSON.parse(dataset) as any[]).map((bookFromFile) => {
+      const convertedBook: Book = {
+        title: bookFromFile.title,
+        author: bookFromFile.author,
+        date: new Date(bookFromFile.date),
+      };
+      return convertedBook;
+    });
 
+    // Call external API and then convert content to a Book[]
     const externalBooks = await firstValueFrom(
       this.httpService
         .get<ExternalBook[]>('https://api.npoint.io/40518b0773c787f94072')
-        .pipe(map((response) => response.data)),
+        .pipe(
+          map((response) =>
+            response.data.map((externalBook) => ({
+              title: externalBook.title,
+              author: externalBook.authors,
+              date: new Date(externalBook.publication_date),
+            })),
+          ),
+        ),
     );
 
-    externalBooks
-      .map((externalBook) => {
-        const convertedBook: Book = {
-          title: externalBook.title,
-          author: externalBook.authors,
-          date: new Date(externalBook.publication_date),
-        };
-        return convertedBook;
-      })
-      .forEach((book) => this.addBook(book));
+    // Add all the books
+    [...fileBooks, ...externalBooks].forEach((book) => this.addBook(book));
 
     this.logger.log(`There are ${this.bookStorage.size} books in the storage.`);
   }
@@ -89,7 +88,7 @@ export class BookService implements OnModuleInit {
     this.bookStorage.delete(bookTitle);
   }
 
-  searchByAuthorAndTitle(term: string) {
+  searchByAuthorAndTitle(term: string): Book[] {
     const escapedTerm = term.toLowerCase().trim();
 
     return this.getAllBooks().filter((book) => {
